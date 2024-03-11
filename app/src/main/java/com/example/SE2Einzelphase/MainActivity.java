@@ -1,7 +1,6 @@
 package com.example.SE2Einzelphase;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -42,25 +41,12 @@ public class MainActivity extends AppCompatActivity {
         serverResponse = findViewById(R.id.responseText);
         calculatedMatrNr = findViewById(R.id.calculatedMatrNrPlaceHolder);
 
-        btnSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnSendToServer();
-            }
-        });
+        btnSend.setOnClickListener(v -> btnSendToServer());
 
-        btnCaclulate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String userInput = studentNumber.getText().toString();
-                String res = manipulateMatrNrString(userInput);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        calculatedMatrNr.setText(res);
-                    }
-                });
-            }
+        btnCaclulate.setOnClickListener(v -> {
+            String userInput = studentNumber.getText().toString();
+            String res = manipulateMatrNrString(userInput);
+            runOnUiThread(() -> calculatedMatrNr.setText(res));
         });
     }
 
@@ -68,33 +54,25 @@ public class MainActivity extends AppCompatActivity {
         String userInput = studentNumber.getText().toString();
 
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Socket s = new Socket("se2-submission.aau.at", 20080);
+        new Thread(() -> {
+            try {
+                Socket s = new Socket("se2-submission.aau.at", 20080);
 
-                    PrintWriter out = new PrintWriter(s.getOutputStream(), true);
-                    out.println(userInput);
+                PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+                out.println(userInput);
 
-                    BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-                    String response = in.readLine();
+                BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+                String response = in.readLine();
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            serverResponse.setText(response);
-                        }
-                    });
+                runOnUiThread(() -> serverResponse.setText(response));
 
 
-                    out.close();
-                    in.close();
-                    s.close();
+                out.close();
+                in.close();
+                s.close();
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }).start();
 
